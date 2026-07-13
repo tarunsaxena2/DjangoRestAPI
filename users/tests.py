@@ -1,27 +1,25 @@
-from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from .models import UserProfile
 
-class UserAPITestCase(APITestCase):
+
+class UserProfileAPITestCase(APITestCase):
+
     def setUp(self):
-        self.admin = User.objects.create_superuser(
-            username='admin',
-            email='admin@gmail.com',
-            password='admin123'
-        )
-
-        self.user = User.objects.create_user(
-            username='tarun',
+        self.user_profile = UserProfile.objects.create(
+            name='Tarun Saxena',
             email='tarun@gmail.com',
-            password='tarun123'
+            phone='9876543210',
+            city='Agra'
         )
 
-    def test_create_user(self):
+    def test_create_user_profile(self):
         data = {
-            'username': 'rahul',
+            'name': 'Rahul Sharma',
             'email': 'rahul@gmail.com',
-            'password': 'rahul123'
+            'phone': '9876500000',
+            'city': 'Delhi'
         }
 
         response = self.client.post(
@@ -35,9 +33,7 @@ class UserAPITestCase(APITestCase):
             status.HTTP_201_CREATED
         )
 
-    def test_list_users(self):
-        self.client.force_authenticate(user=self.admin)
-
+    def test_list_user_profiles(self):
         response = self.client.get('/api/users/')
 
         self.assertEqual(
@@ -45,12 +41,24 @@ class UserAPITestCase(APITestCase):
             status.HTTP_200_OK
         )
 
-    def test_user_can_update_own_profile(self):
-        self.client.force_authenticate(user=self.user)
+    def test_get_single_user_profile(self):
+        response = self.client.get(
+            f'/api/users/{self.user_profile.id}/'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+    def test_update_user_profile(self):
+        data = {
+            'city': 'Noida'
+        }
 
         response = self.client.patch(
-            f'/api/users/{self.user.id}/',
-            {'first_name': 'Tarun'},
+            f'/api/users/{self.user_profile.id}/',
+            data,
             format='json'
         )
 
@@ -59,21 +67,12 @@ class UserAPITestCase(APITestCase):
             status.HTTP_200_OK
         )
 
-    def test_user_cannot_update_other_user(self):
-        second_user = User.objects.create_user(
-            username='second',
-            password='second123'
-        )
-
-        self.client.force_authenticate(user=self.user)
-
-        response = self.client.patch(
-            f'/api/users/{second_user.id}/',
-            {'first_name': 'Wrong Update'},
-            format='json'
+    def test_delete_user_profile(self):
+        response = self.client.delete(
+            f'/api/users/{self.user_profile.id}/'
         )
 
         self.assertEqual(
             response.status_code,
-            status.HTTP_403_FORBIDDEN
+            status.HTTP_204_NO_CONTENT
         )

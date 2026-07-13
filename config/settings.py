@@ -127,8 +127,8 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+    'rest_framework.permissions.AllowAny',
+],
 
     'DEFAULT_PAGINATION_CLASS': (
         'rest_framework.pagination.PageNumberPagination'
@@ -142,5 +142,3 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
 }
-LOGIN_REDIRECT_URL = '/api/users/'
-LOGOUT_REDIRECT_URL = '/api-auth/login/'
